@@ -27,11 +27,17 @@ export default function AddWorkerFloatingButtonWrapper() {
   // Detect the current route
   const pathname = usePathname();
 
-  // List of routes where the floating button should NOT appear
-  const excludedRoutes = ["/workers", "/settings"];
+  // // List of routes where the floating button should NOT appear
+  // const excludedRoutes = ["/workers", "/settings", "/reports", "/workers/[id]"];
 
-  // Do not render the button if no firms exist or if the current route is excluded
-  if (firms.length === 0 || excludedRoutes.includes(pathname)) return null;
+  // // Do not render the button if no firms exist or if the current route is excluded
+  // if (firms.length === 0 || excludedRoutes.includes(pathname)) return null;
+
+  // Only show the floating button on the /dashboard route
+  const allowedRoute = "/";
+
+  // Do not render the button if no firms exist or if the current route is not the allowed route
+  if (firms.length === 0 || pathname !== allowedRoute) return null;
 
   return (
     <>

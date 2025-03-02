@@ -1,8 +1,9 @@
-// "use client";
 
-// import { create } from 'zustand';
-// import { persist } from 'zustand/middleware';
-// import { Firm, Worker, WorkLog, Payment, AppSettings } from './types';
+
+// "use client";
+// import { create } from "zustand";
+// import { persist } from "zustand/middleware";
+// import { Firm, Worker, WorkLog, Payment, AppSettings } from "./types";
 
 // // Firms Store
 // interface FirmsState {
@@ -14,7 +15,6 @@
 //   selectFirm: (id: string) => void;
 //   getSelectedFirm: () => Firm | undefined;
 // }
-
 // export const useFirmsStore = create<FirmsState>()(
 //   persist(
 //     (set, get) => ({
@@ -40,7 +40,7 @@
 //       },
 //     }),
 //     {
-//       name: 'firms-storage',
+//       name: "firms-storage",
 //     }
 //   )
 // );
@@ -49,21 +49,40 @@
 // interface WorkersState {
 //   workers: Worker[];
 //   addWorker: (worker: Worker) => void;
-//   updateWorker: (id: string, data: Partial<Worker>) => void;
+//   // updateWorker: (id: string, data: Partial<Worker>) => void;
+//   updateWorker: (id: string, data: Partial<Worker> & { payoutAmount?: number }) => void;
 //   deleteWorker: (id: string) => void;
 //   getWorkersByFirm: (firmId: string) => Worker[];
 // }
-
 // export const useWorkersStore = create<WorkersState>()(
 //   persist(
 //     (set, get) => ({
 //       workers: [],
 //       addWorker: (worker) =>
-//         set((state) => ({ workers: [...state.workers, worker] })),
+//         set((state) => ({
+//           workers: [
+//             ...state.workers,
+//             {
+//               ...worker,
+//               totalAmount: worker.totalAmount || 0, // Default to 0
+//               advanceAmount: worker.advanceAmount || 0, // Default to 0
+//             },
+//           ],
+//         })),
 //       updateWorker: (id, data) =>
 //         set((state) => ({
 //           workers: state.workers.map((worker) =>
-//             worker.id === id ? { ...worker, ...data } : worker
+//             worker.id === id
+//               ? {
+//                   ...worker,
+//                   ...data,
+//                   totalAmount: (data.totalAmount ?? worker.totalAmount) || 0,
+//                   advanceAmount: (data.advanceAmount ?? worker.advanceAmount) || 0,
+//                   // payoutsMade: (worker.payoutsMade || 0) + payoutAmount,
+//                   // payoutsMade: (worker.payoutsMade || 0),
+//                   payoutsMade: (worker.payoutsMade || 0) + (data.payoutAmount || 0),
+//                 }
+//               : worker
 //           ),
 //         })),
 //       deleteWorker: (id) =>
@@ -76,10 +95,21 @@
 //       },
 //     }),
 //     {
-//       name: 'workers-storage',
+//       name: "workers-storage",
 //     }
 //   )
 // );
+
+// // Initialize payoutsMade for existing workers
+// export function initializePayoutsMade() {
+//   const { workers, updateWorker } = useWorkersStore.getState();
+//   workers.forEach((worker) => {
+//     if (worker.payoutsMade === undefined) {
+//       updateWorker(worker.id, { payoutsMade: 0 });
+//     }
+//   });
+// }
+
 
 // // Logs Store (WorkLogs and Payments)
 // interface LogsState {
@@ -96,7 +126,6 @@
 //   getWorkLogsByFirm: (firmId: string) => WorkLog[];
 //   getPaymentsByFirm: (firmId: string) => Payment[];
 // }
-
 // export const useLogsStore = create<LogsState>()(
 //   persist(
 //     (set, get) => ({
@@ -114,8 +143,34 @@
 //         set((state) => ({
 //           workLogs: state.workLogs.filter((log) => log.id !== id),
 //         })),
-//       addPayment: (payment) =>
-//         set((state) => ({ payments: [...state.payments, payment] })),
+//      addPayment: (payment) => {
+//   set((state) => {
+//     if (payment.type === "advance") {
+//       // Increase advanceAmount
+//       useWorkersStore.getState().updateWorker(payment.workerId, {
+//         advanceAmount: (prev) => (prev || 0) + payment.amount,
+//       });
+//     } else if (payment.type === "payout") {
+//       // Deduct payout from advanceAmount first, then from totalAmount
+//       useWorkersStore.getState().updateWorker(payment.workerId, (worker) => {
+//         const remainingAdvance = Math.max(0, (worker.advanceAmount || 0) - payment.amount);
+//         const remainingPayout = payment.amount - (worker.advanceAmount || 0);
+
+//         return {
+//           advanceAmount: remainingAdvance, // Reduce advanceAmount first
+//           totalAmount: (worker.totalAmount || 0) - (remainingPayout > 0 ? remainingPayout : 0), // Deduct remaining payout from totalAmount
+//         };
+//       });
+//     } else if (payment.type === "clear_advance") {
+//       // Clear advanceAmount
+//       useWorkersStore.getState().updateWorker(payment.workerId, {
+//         advanceAmount: 0,
+//       });
+//     }
+
+//     return { payments: [...state.payments, payment] };
+//   });
+// },
 //       updatePayment: (id, data) =>
 //         set((state) => ({
 //           payments: state.payments.map((payment) =>
@@ -144,7 +199,7 @@
 //       },
 //     }),
 //     {
-//       name: 'logs-storage',
+//       name: "logs-storage",
 //     }
 //   )
 // );
@@ -154,14 +209,13 @@
 //   settings: AppSettings;
 //   updateSettings: (data: Partial<AppSettings>) => void;
 // }
-
 // export const useSettingsStore = create<SettingsState>()(
 //   persist(
 //     (set) => ({
 //       settings: {
-//         pricePerKg: 15, // Default price per kg
-//         currency: '₹', // Default currency
-//         theme: 'light', // Default theme
+//         pricePerKg: 2, // Default price per kg
+//         currency: "₹", // Default currency
+//         theme: "light", // Default theme
 //       },
 //       updateSettings: (data) =>
 //         set((state) => ({
@@ -169,11 +223,10 @@
 //         })),
 //     }),
 //     {
-//       name: 'settings-storage',
+//       name: "settings-storage",
 //     }
 //   )
 // );
-
 
 "use client";
 import { create } from "zustand";
@@ -224,7 +277,6 @@ export const useFirmsStore = create<FirmsState>()(
 interface WorkersState {
   workers: Worker[];
   addWorker: (worker: Worker) => void;
-  // updateWorker: (id: string, data: Partial<Worker>) => void;
   updateWorker: (id: string, data: Partial<Worker> & { payoutAmount?: number }) => void;
   deleteWorker: (id: string) => void;
   getWorkersByFirm: (firmId: string) => Worker[];
@@ -241,6 +293,7 @@ export const useWorkersStore = create<WorkersState>()(
               ...worker,
               totalAmount: worker.totalAmount || 0, // Default to 0
               advanceAmount: worker.advanceAmount || 0, // Default to 0
+              payoutsMade: worker.payoutsMade || 0, // Default to 0
             },
           ],
         })),
@@ -253,8 +306,6 @@ export const useWorkersStore = create<WorkersState>()(
                   ...data,
                   totalAmount: (data.totalAmount ?? worker.totalAmount) || 0,
                   advanceAmount: (data.advanceAmount ?? worker.advanceAmount) || 0,
-                  // payoutsMade: (worker.payoutsMade || 0) + payoutAmount,
-                  // payoutsMade: (worker.payoutsMade || 0),
                   payoutsMade: (worker.payoutsMade || 0) + (data.payoutAmount || 0),
                 }
               : worker
@@ -284,7 +335,6 @@ export function initializePayoutsMade() {
     }
   });
 }
-
 
 // Logs Store (WorkLogs and Payments)
 interface LogsState {
@@ -318,34 +368,35 @@ export const useLogsStore = create<LogsState>()(
         set((state) => ({
           workLogs: state.workLogs.filter((log) => log.id !== id),
         })),
-     addPayment: (payment) => {
-  set((state) => {
-    if (payment.type === "advance") {
-      // Increase advanceAmount
-      useWorkersStore.getState().updateWorker(payment.workerId, {
-        advanceAmount: (prev) => (prev || 0) + payment.amount,
-      });
-    } else if (payment.type === "payout") {
-      // Deduct payout from advanceAmount first, then from totalAmount
-      useWorkersStore.getState().updateWorker(payment.workerId, (worker) => {
-        const remainingAdvance = Math.max(0, (worker.advanceAmount || 0) - payment.amount);
-        const remainingPayout = payment.amount - (worker.advanceAmount || 0);
+      addPayment: (payment) => {
+        set((state) => {
+          if (payment.type === "advance") {
+            // Increase advanceAmount
+            useWorkersStore.getState().updateWorker(payment.workerId, {
+              advanceAmount: (prev) => (prev || 0) + payment.amount,
+            });
+          } else if (payment.type === "payout") {
+            // Deduct payout from advanceAmount first, then from totalAmount
+            useWorkersStore.getState().updateWorker(payment.workerId, (worker) => {
+              const remainingAdvance = Math.max(0, (worker.advanceAmount || 0) - payment.amount);
+              const remainingPayout = payment.amount - (worker.advanceAmount || 0);
 
-        return {
-          advanceAmount: remainingAdvance, // Reduce advanceAmount first
-          totalAmount: (worker.totalAmount || 0) - (remainingPayout > 0 ? remainingPayout : 0), // Deduct remaining payout from totalAmount
-        };
-      });
-    } else if (payment.type === "clear_advance") {
-      // Clear advanceAmount
-      useWorkersStore.getState().updateWorker(payment.workerId, {
-        advanceAmount: 0,
-      });
-    }
+              return {
+                advanceAmount: remainingAdvance, // Reduce advanceAmount first
+                totalAmount: (worker.totalAmount || 0) - (remainingPayout > 0 ? remainingPayout : 0), // Deduct remaining payout from totalAmount
+                payoutsMade: (worker.payoutsMade || 0) + payment.amount, // Track total payouts made
+              };
+            });
+          } else if (payment.type === "clear_advance") {
+            // Clear advanceAmount
+            useWorkersStore.getState().updateWorker(payment.workerId, {
+              advanceAmount: 0,
+            });
+          }
 
-    return { payments: [...state.payments, payment] };
-  });
-},
+          return { payments: [...state.payments, payment] };
+        });
+      },
       updatePayment: (id, data) =>
         set((state) => ({
           payments: state.payments.map((payment) =>

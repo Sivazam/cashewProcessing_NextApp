@@ -260,7 +260,7 @@ export default function Home() {
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col pb-20">
       {/* Main Navigation */}
       <MainNav />
 

@@ -587,7 +587,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PlusCircle, Trash, Wallet, RefreshCcw, User, DollarSign, FileText, ArrowRight } from "lucide-react";
+import { PlusCircle, Trash, Wallet, RefreshCcw, User, DollarSign, FileText, ArrowRight, IndianRupee } from "lucide-react";
 import { Worker } from "@/lib/types";
 import { useWorkersStore, useSettingsStore, useLogsStore } from "@/lib/store";
 import { AddWorkLogDialog } from "@/components/work-logs/add-work-log-dialog";
@@ -611,13 +611,26 @@ export function WorkerCard({ worker }: WorkerCardProps) {
   const [showClearAdvanceAlert, setShowClearAdvanceAlert] = useState(false);
 
   // Calculate advances and payouts dynamically
-  const advancesGiven = worker.advanceAmount || 0;
-  const payoutsMade = payments
-    .filter((p) => p.workerId === worker.id && p.type === "payout")
-    .reduce((sum, payment) => sum + payment.amount, 0);
+  // const advancesGiven = worker.advanceAmount || 0;
 
-  // Calculate pending amount dynamically
-  const pendingAmount = worker.totalAmount - worker.advanceAmount - payoutsMade;
+  // const payoutsMade = payments
+  //   .filter((p) => p.workerId === worker.id && p.type === "payout")
+  //   .reduce((sum, payment) => sum + payment.amount, 0);
+
+  // // Calculate pending amount dynamically
+  // const pendingAmount = worker.totalAmount - worker.advanceAmount - payoutsMade;
+
+  const advancesGiven = payments
+  .filter((payment) => payment.workerId === worker.id && payment.type === "advance")
+  .reduce((sum, payment) => sum + payment.amount, 0);
+
+const payoutsMade = payments
+  .filter((payment) => payment.workerId === worker.id && payment.type === "payout")
+  .reduce((sum, payment) => sum + payment.amount, 0);
+  
+    // Calculate pending amount dynamically
+    const pendingAmount = worker.totalAmount - advancesGiven - payoutsMade;
+
 
   const handleDelete = () => {
     deleteWorker(worker.id);
@@ -792,7 +805,7 @@ export function WorkerCard({ worker }: WorkerCardProps) {
               onClick={() => openPaymentDialog("payout")}
               className="w-full rounded-lg h-8 shadow-sm bg-purple-500 text-white hover:bg-purple-600 text-xs font-medium"
             >
-              <DollarSign className="mr-1 h-3 w-3" />
+              <IndianRupee className="mr-1 h-3 w-3" />
               <span>Payout</span>
             </Button>
           </motion.div>

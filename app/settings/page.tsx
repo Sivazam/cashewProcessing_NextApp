@@ -226,7 +226,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { MainNav } from "@/components/layout/main-nav";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, PlusCircle, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -341,7 +341,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col pb-20">
       <MainNav />
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <div className="flex items-center justify-between">
@@ -350,7 +350,7 @@ export default function SettingsPage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* General Settings */}
-          <Card className="col-span-2">
+          <Card className="col-span-1">
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
               <CardDescription>Configure application-wide settings</CardDescription>
@@ -393,10 +393,10 @@ export default function SettingsPage() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="₹">Indian Rupee (₹)</SelectItem>
-                            <SelectItem value="$">US Dollar ($)</SelectItem>
+                            {/* <SelectItem value="$">US Dollar ($)</SelectItem>
                             <SelectItem value="€">Euro (€)</SelectItem>
                             <SelectItem value="£">British Pound (£)</SelectItem>
-                            <SelectItem value="¥">Japanese Yen (¥)</SelectItem>
+                            <SelectItem value="¥">Japanese Yen (¥)</SelectItem> */}
                           </SelectContent>
                         </Select>
                         <FormDescription>
@@ -420,7 +420,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Manage Firms</CardTitle>
-              <CardDescription>Add, edit, or delete firms</CardDescription>
+              <CardDescription>edit, or delete firms</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -462,6 +462,8 @@ export default function SettingsPage() {
                             <Pencil className="h-4 w-4" /> {/* Edit Icon */}
                           </Button>
                         )}
+
+                          
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -471,6 +473,7 @@ export default function SettingsPage() {
                             >
                               <Trash2 className="h-4 w-4" /> {/* Delete Icon */}
                             </Button>
+                            
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
@@ -491,6 +494,7 @@ export default function SettingsPage() {
                       </div>
                     </TableCell>
                     </TableRow>
+                  
                   ))}
                 </TableBody>
               </Table>
