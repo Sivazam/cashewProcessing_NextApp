@@ -1632,6 +1632,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "next-themes";
+import {  UploadExcelDialog } from "../UploadCsvDialog";
 
 interface WorkerDailyLog {
   date: string; // Date in dd/MM/yyyy format
@@ -1656,6 +1657,7 @@ export function WorkerDailyLogTable() {
   const { firms, selectedFirmId } = useFirmsStore();
   const { settings } = useSettingsStore();
   const { theme } = useTheme();
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   // Update date range when month changes
   useEffect(() => {
@@ -1665,7 +1667,7 @@ export function WorkerDailyLogTable() {
     }
   }, [selectedMonth, viewType]);
 
-  // Main data processing effect
+  // Main data processing effect -- prev working version 
   useEffect(() => {
     if (!selectedFirmId) return;
 
@@ -1719,6 +1721,8 @@ export function WorkerDailyLogTable() {
           .reduce((sum, payment) => sum + payment.amount, 0);
           
         const totalAdvancesCleared = payments
+        // @ts-ignore
+
           .filter(payment => payment.workerId === worker.id && payment.type === "clear_advance")
           .reduce((sum, payment) => sum + payment.amount, 0);
           
@@ -1730,7 +1734,7 @@ export function WorkerDailyLogTable() {
         const netAdvances = totalAdvancesGiven - totalAdvancesCleared;
         
         // Calculate pending payable based on worker's total lifetime earnings minus advances and payouts
-        const pendingPayable = worker.totalAmount - netAdvances - totalPayoutsMade;
+        const pendingPayable = worker.totalAmount - (netAdvances - totalPayoutsMade);
         
         // Create a comma-separated string of dates with activity
         const activeDates = [...new Set([
@@ -1804,6 +1808,8 @@ export function WorkerDailyLogTable() {
         const beforePeriodAdvancesCleared = payments
           .filter(payment => 
             payment.workerId === selectedWorker.id && 
+            // @ts-ignore
+
             payment.type === "clear_advance" &&
             isBefore(new Date(payment.date), new Date(startOfPeriod))
           )
@@ -1842,6 +1848,8 @@ export function WorkerDailyLogTable() {
           
           const dayAdvancesCleared = payments.filter(payment => 
             payment.workerId === selectedWorker.id && 
+            // @ts-ignore
+
             payment.type === "clear_advance" && 
             isSameDay(new Date(payment.date), date)
           );
@@ -1867,7 +1875,7 @@ export function WorkerDailyLogTable() {
           
           // Calculate net advances and pending payable as of this day
           const netAdvances = runningAdvances - runningAdvancesCleared;
-          const pendingPayable = runningEarnings - netAdvances - runningPayouts;
+          const pendingPayable = runningEarnings - (netAdvances - runningPayouts);
           
           return {
             date: format(date, "dd/MM/yyyy"),
@@ -1893,6 +1901,8 @@ export function WorkerDailyLogTable() {
     setDailyLogs(logs);
   }, [workers, workLogs, payments, selectedFirmId, selectedMonth, startDate, endDate, selectedWorkerId]);
 
+
+
   const exportToExcel = () => {
     const selectedFirm = firms.find((firm) => firm.id === selectedFirmId);
     const firmName = selectedFirm?.name || "Unknown Firm";
@@ -1909,8 +1919,11 @@ export function WorkerDailyLogTable() {
     const totalAdvancesGiven = dailyLogs.reduce((sum, log) => sum + log.advancesGiven, 0);
     const totalAmountEarned = dailyLogs.reduce((sum, log) => sum + log.totalAmountEarned, 0);
     const totalPayoutsMade = dailyLogs.reduce((sum, log) => sum + log.payoutsMade, 0);
-    const totalPendingPayable = dailyLogs.length > 0 ? dailyLogs[dailyLogs.length - 1].pendingPayable : 0;
-
+    // const totalPendingPayable = dailyLogs.length > 0 ? dailyLogs[dailyLogs.length - 1].pendingPayable : 0;
+    const totalPendingPayable = dailyLogs.length > 0 ? dailyLogs.reduce((sum, log) => sum + log.pendingPayable, 0)
+    : 0;
+    
+    
     const excelData = [
       ["Firm Name", firmName],
       ["Period", dateRangeText],
@@ -2116,6 +2129,8 @@ export function WorkerDailyLogTable() {
               </Popover>
             </div>
           </div>
+          <Button onClick={() => setIsUploadDialogOpen(true)}>Upload CSV</Button>
+          <UploadExcelDialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen} />
 
           {/* Export Button */}
           <Button 
@@ -2190,7 +2205,7 @@ export function WorkerDailyLogTable() {
                     {settings.currency} {dailyLogs.reduce((sum, log) => sum + log.pendingPayable, 0).toFixed(2)}
                   </td> */}
                   <td className={`px-4 py-3 whitespace-nowrap font-bold ${dailyLogs.reduce((sum, log) => sum + log.pendingPayable, 0) < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                    {settings.currency} {dailyLogs.reduce((sum, log) => log.pendingPayable, 0).toFixed(2)}
+                    {settings.currency} {dailyLogs.reduce((sum, log) => sum + log.pendingPayable, 0).toFixed(2)}
                   </td>
                 </tr>
               )}

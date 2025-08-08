@@ -185,6 +185,7 @@ export default function WorkerDetailsPage() {
             <div className="flex items-center gap-4">
               {/* Avatar */}
               <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-border shadow-sm">
+                
                 {worker.avatar ? (
                   <Image 
                     src={worker?.avatar} 

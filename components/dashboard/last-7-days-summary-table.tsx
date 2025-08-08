@@ -100,35 +100,67 @@ export function Last7DaysSummaryTable() {
   const { workLogs } = useLogsStore();
   const { selectedFirmId } = useFirmsStore();
 
-  useEffect(() => {
-    if (!selectedFirmId) return;
+  //prev workibg verison
+  // useEffect(() => {
+  //   if (!selectedFirmId) return;
 
-    // Generate the last 7 days' dates
-    const dates = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i));
+  //   // Generate the last 7 days' dates
+  //   const dates = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i));
 
-    // Calculate the total kgs processed for each day
-    const summaries = dates.map((date) => {
-      const formattedDate = format(date, "dd/MM/yy"); // Full date format
-      const day = format(date, "dd"); // Only the day (e.g., "01", "02")
-      const kgsProcessed =
-        workLogs
-          ?.filter(
-            (log) =>
-              log.firmId === selectedFirmId &&
-              format(new Date(log.date), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
-          )
-          .reduce((sum, log) => sum + (log.kgsProcessed || 0), 0) || 0;
+  //   // Calculate the total kgs processed for each day
+  //   const summaries = dates.map((date) => {
+  //     const formattedDate = format(date, "dd/MM/yy"); // Full date format
+  //     const day = format(date, "dd"); // Only the day (e.g., "01", "02")
+  //     const kgsProcessed =
+  //       workLogs
+  //         ?.filter(
+  //           (log) =>
+  //             log.firmId === selectedFirmId &&
+  //             format(new Date(log.date), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+  //         )
+  //         .reduce((sum, log) => sum + (log.kgsProcessed || 0), 0) || 0;
 
-      return {
-        formattedDate,
-        day,
-        totalKgsProcessed: kgsProcessed,
-      };
-    });
+  //     return {
+  //       formattedDate,
+  //       day,
+  //       totalKgsProcessed: kgsProcessed,
+  //     };
+  //   });
 
-    // Reverse the array to show the oldest date first
-    setSummaryData(summaries.reverse());
-  }, [workLogs, selectedFirmId]);
+  //   // Reverse the array to show the oldest date first
+  //   setSummaryData(summaries.reverse());
+  // }, [workLogs, selectedFirmId]);
+
+  // Last7DaysSummaryTable.tsx
+useEffect(() => {
+  if (!selectedFirmId) return;
+
+  // Generate the last 7 days' dates
+  const dates = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i));
+
+  // Calculate the total kgs processed for each day
+  const summaries = dates.map((date) => {
+    const formattedDate = format(date, "dd/MM/yy"); // Full date format
+    const day = format(date, "dd"); // Only the day (e.g., "01", "02")
+    const kgsProcessed =
+      workLogs
+        ?.filter(
+          (log) =>
+            log.firmId === selectedFirmId &&
+            format(new Date(log.date), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+        )
+        .reduce((sum, log) => sum + (log.kgsProcessed || 0), 0) || 0;
+
+    return {
+      formattedDate,
+      day,
+      totalKgsProcessed: kgsProcessed,
+    };
+  });
+
+  // Reverse the array to show the oldest date first
+  setSummaryData(summaries.reverse());
+}, [workLogs, selectedFirmId]);
 
   if (!selectedFirmId) {
     return (

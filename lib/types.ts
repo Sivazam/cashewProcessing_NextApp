@@ -6,7 +6,20 @@ export interface Firm {
   createdAt: string;
 }
 
-// Worker interface
+// // Worker interface
+// export interface Worker {
+//   id: string;
+//   name: string;
+//   firmId: string;
+//   phone?: string;
+//   totalKgsProcessed: number;
+//   totalAmount: number;
+//   advanceAmount: number;
+//   payoutsMade?: number; // Payouts made to the worker (optional, default 0)
+//   createdAt: string;
+// }
+
+// Worker interface with avatar
 export interface Worker {
   id: string;
   name: string;
@@ -15,9 +28,11 @@ export interface Worker {
   totalKgsProcessed: number;
   totalAmount: number;
   advanceAmount: number;
-  payoutsMade?: number; // Payouts made to the worker (optional, default 0)
+  payoutsMade?: number; // Optional payouts made to the worker
   createdAt: string;
+  avatar?: string; // Add avatar as an optional field
 }
+
 
 // WorkLog interface
 export interface WorkLog {
@@ -37,7 +52,7 @@ export interface Payment {
   firmId: string;
   date: string;
   amount: number;
-  type: 'advance' | 'payout';
+  type: 'advance' | 'payout' | 'clear_advance'; // Added 'clear_advance' to the type
   createdAt: string;
 }
 

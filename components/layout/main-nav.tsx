@@ -146,9 +146,11 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFirmsStore } from "@/lib/store";
 import { FirmSwitcher } from "@/components/firms/firm-switcher";
+import cashuLogo from "@/assets/CashuLogo.png"; 
+
 
 export function MainNav() {
   const pathname = usePathname();
@@ -181,6 +183,22 @@ export function MainNav() {
     },
   ];
 
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  useEffect(() => {
+    // Check window width on client side
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth > 768);
+    };
+
+    checkScreenSize(); // Initial check
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => {
+      window.removeEventListener("resize", checkScreenSize);
+    };
+  }, []);
+
   return (
     <>
       {/* Top Navigation Bar */}
@@ -188,11 +206,18 @@ export function MainNav() {
         <div className="flex h-16 items-center px-4">
           {/* Page Name */}
           <Link href="/" className="flex items-center">
-            <h1 className="text-lg font-bold tracking-tight sm:text-xl">
+            {/* <h1 className="text-lg font-bold tracking-tight sm:text-xl">
               CashewTrack
-            </h1>
+            </h1> */}
+            <img 
+              src={cashuLogo.src}
+              alt="CASHU Logo"
+              className="h-8 mr-2 w-auto"
+            />
+             <span className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              {isLargeScreen ? "CASHU PAY" : "CP"}
+            </span>
           </Link>
-
           {/* Navigation Links for Desktop */}
           <nav className="hidden lg:flex mx-6 items-center space-x-4 lg:space-x-6">
             {routes.map((route) => (
@@ -219,7 +244,8 @@ export function MainNav() {
             </div>
             {/* Smaller Firm Switcher for Mobile */}
             <div className="block sm:hidden">
-              <FirmSwitcher className="w-32 text-xs" />
+            {/* <FirmSwitcher className="w-32 text-xs" /> */}
+            <FirmSwitcher/>
             </div>
             {/* Theme Toggle */}
             <ModeToggle />

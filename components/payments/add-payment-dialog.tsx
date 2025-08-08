@@ -601,8 +601,17 @@ export function AddPaymentDialog({
   console.log("Updated Worker:", payoutsMade);
 
 
-  const pendingAmount = 
-    worker?.totalAmount - (worker?.advanceAmount || 0) - (payoutsMade || 0);
+  // const pendingAmount = 
+  //   worker?.totalAmount - (worker?.advanceAmount || 0) - (payoutsMade || 0);
+
+  const pendingAmount =
+  worker?.totalAmount !== undefined
+    ? worker.totalAmount - (worker?.advanceAmount || 0) - (payoutsMade || 0)
+    : 0;
+  console.log("Pending Amount:", pendingAmount);
+  console.log("Worker ID:", workerId);
+  console.log("Selected Firm ID:", selectedFirmId);
+  console.log("Worker:", worker);
 
     console.log(">>>>>>>>Woker",worker)
     

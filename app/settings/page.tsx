@@ -273,6 +273,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useSettingsStore, useFirmsStore } from "@/lib/store";
+import logo from "@/assets/CashuLogo.png"; 
+
 
 const formSchema = z.object({
   pricePerKg: z.coerce.number().positive({
@@ -510,16 +512,16 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex flex-col items-center justify-center">
                 <img
-                  // src="https://cdn.qwenlm.ai/output/21cc021e-0871-4212-9711-801baa62a955/t2i/1232a6ac-bc1a-4a78-9bc9-c78276e3ec09/71be2a8f-0854-4cb9-9152-965d819cc581.png" // Replace with your app logo path
-                  src="https://cdn.qwenlm.ai/output/21cc021e-0871-4212-9711-801baa62a955/t2i/641eb353-3603-4c71-89b0-202043e8ae35/a02101b3-7edb-4928-8d0d-33a3c131c94f.png" // Replace with your app logo path
-                  
+                  src={logo.src}
                   alt="App Logo"
                   className="w-20 h-20 rounded-full object-cover"
                 />
-                <h3 className="text-lg font-semibold mt-2">Worker Management App</h3>
+                <h3 className="text-lg font-semibold mt-2">CASHU PAY</h3>
                 <p className="text-sm text-muted-foreground">
                   Version 1.0.0
                 </p>
+                  {/* <p className="space-y-8">Worker Management App </p> */}
+               
                 <p className="text-sm text-muted-foreground">
                   A simple app to manage workers, firms, and payments.
                 </p>

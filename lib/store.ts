@@ -368,35 +368,76 @@ export const useLogsStore = create<LogsState>()(
         set((state) => ({
           workLogs: state.workLogs.filter((log) => log.id !== id),
         })),
+      // addPayment: (payment) => {
+      //   set((state) => {
+      //     if (payment.type === "advance") {
+      //       // Increase advanceAmount
+      //       // useWorkersStore.getState().updateWorker(payment.workerId, {
+      //       //   advanceAmount: (prev) => (prev || 0) + payment.amount,
+      //       // });
+      //       useWorkersStore.getState().updateWorker(payment.workerId, {
+      //         advanceAmount: (worker.advanceAmount || 0) + payment.amount
+      //       });
+      //     } else if (payment.type === "payout") {
+      //       // Deduct payout from advanceAmount first, then from totalAmount
+      //       useWorkersStore.getState().updateWorker(payment.workerId, (worker) => {
+      //         const remainingAdvance = Math.max(0, (worker.advanceAmount || 0) - payment.amount);
+      //         const remainingPayout = payment.amount - (worker.advanceAmount || 0);
+
+      //         return {
+      //           advanceAmount: remainingAdvance, // Reduce advanceAmount first
+      //           totalAmount: (worker.totalAmount || 0) - (remainingPayout > 0 ? remainingPayout : 0), // Deduct remaining payout from totalAmount
+      //           payoutsMade: (worker.payoutsMade || 0) + payment.amount, // Track total payouts made
+      //         };
+      //       });
+      //     } else if (payment.type === "clear_advance") {
+      //       // Clear advanceAmount
+      //       useWorkersStore.getState().updateWorker(payment.workerId, {
+      //         advanceAmount: 0,
+      //       });
+      //     }
+
+      //     return { payments: [...state.payments, payment] };
+      //   });
+      // },
+      
+      
       addPayment: (payment) => {
         set((state) => {
-          if (payment.type === "advance") {
-            // Increase advanceAmount
-            useWorkersStore.getState().updateWorker(payment.workerId, {
-              advanceAmount: (prev) => (prev || 0) + payment.amount,
-            });
-          } else if (payment.type === "payout") {
-            // Deduct payout from advanceAmount first, then from totalAmount
-            useWorkersStore.getState().updateWorker(payment.workerId, (worker) => {
+          const worker = useWorkersStore.getState().workers.find(
+            (worker) => worker.id === payment.workerId
+          );
+      
+          if (worker) {
+            if (payment.type === "advance") {
+              // Increase advanceAmount
+              useWorkersStore.getState().updateWorker(payment.workerId, {
+                advanceAmount: (worker.advanceAmount || 0) + payment.amount,
+              });
+            } else if (payment.type === "payout") {
+              // Deduct payout from advanceAmount first, then from totalAmount
               const remainingAdvance = Math.max(0, (worker.advanceAmount || 0) - payment.amount);
               const remainingPayout = payment.amount - (worker.advanceAmount || 0);
-
-              return {
+      
+              // Update the worker with the calculated values
+              useWorkersStore.getState().updateWorker(payment.workerId, {
                 advanceAmount: remainingAdvance, // Reduce advanceAmount first
                 totalAmount: (worker.totalAmount || 0) - (remainingPayout > 0 ? remainingPayout : 0), // Deduct remaining payout from totalAmount
                 payoutsMade: (worker.payoutsMade || 0) + payment.amount, // Track total payouts made
-              };
-            });
-          } else if (payment.type === "clear_advance") {
-            // Clear advanceAmount
-            useWorkersStore.getState().updateWorker(payment.workerId, {
-              advanceAmount: 0,
-            });
+              });
+            } else if (payment.type === "clear_advance") {
+              // Clear advanceAmount
+              useWorkersStore.getState().updateWorker(payment.workerId, {
+                advanceAmount: 0,
+              });
+            }
           }
-
+      
           return { payments: [...state.payments, payment] };
         });
       },
+      
+      
       updatePayment: (id, data) =>
         set((state) => ({
           payments: state.payments.map((payment) =>
