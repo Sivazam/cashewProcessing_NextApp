@@ -7,6 +7,13 @@
 node_modules/
 .firebase/
 
+node_modules
+.next
+out
+.firebase
+.env
+
+
 # testing
 /coverage
 
